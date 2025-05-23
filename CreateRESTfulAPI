@@ -1,0 +1,63 @@
+const express = require('express');
+const app = express();
+
+app.use(express.json());
+
+let books = [
+  { id: 1, title: 'Book 1' },
+  { id: 2, title: 'Book 2' },
+];
+
+app.get('/books', (req, res) => {
+  res.json(books);
+});
+
+app.get('/books/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const book = books.find((book) => book.id === id);
+  if (!book) {
+    res.status(404).json({ message: 'Book not found' });
+  } else {
+    res.json(book);
+  }
+});
+
+app.post('/books', (req, res) => {
+  const book = req.body;
+  book.id = books.length + 1;
+  books.push(book);
+  res.json(book);
+});
+
+app.put('/books/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const bookIndex = books.findIndex((book) => book.id === id);
+  if (bookIndex === -1) {
+    res.status(404).json({ message: 'Book not found' });
+  } else {
+    books[bookIndex] = req.body;
+    books[bookIndex].id = id;
+    res.json(books[bookIndex]);
+  }
+});
+
+app.delete('/books/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const bookIndex = books.findIndex((book) => book.id === id);
+  if (bookIndex === -1) {
+    res.status(404).json({ message: 'Book not found' });
+  } else {
+    books.splice(bookIndex, 1);
+    res.status(204).send();
+  }
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ message: 'Internal Server Error' });
+});
+
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server listening on port ${port}`);
+});
